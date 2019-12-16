@@ -218,7 +218,7 @@ sub parse_constants {
     my ($self, $pkg) = @_;
 
     my $src = $self->{'source'}->{$pkg};
-    while ($src =~ /use\s*constant(.+?);$/gsm) {
+    while ($src =~ /use\s*constant([^;]+?);$/gsm) {
         my $constant_list = $1;
         my $safe = Safe->new();
         my %constants;
