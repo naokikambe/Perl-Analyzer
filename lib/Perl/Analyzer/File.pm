@@ -78,12 +78,41 @@ sub parse {
     return $self->{'data'};
 }
 
+sub _get_default_pkgname {
+    my ($self) = @_;
+	my $fname =  "$self->{'rootdir'}$self->{'filename'}";
+    $fname =~ s/^\.\.//;
+    $fname =~ s/^\.//;
+    $fname =~ s/^\///;
+    $fname =~ s/^/_DEFAULT_::/;
+    $fname =~ s/\//::/g;
+    $fname =~ s/\.(pl|pm)$//;
+    $fname =~ tr/\-/_/;
+    return $fname;
+}
 
 sub parse_package {
     my ($self, $line) = @_;
     # get the package name
     if ($line =~ m/^\s*package\s+([\w\:]+)\s*;/) {
         my $curr_pkg = $1;
+        $self->{'curr_pkg'} = $curr_pkg;
+        $self->{'data'}->{$curr_pkg} = {
+            'filename'         => $self->{'filename'},
+            'filerootdir'      => $self->{'rootdir'},
+            'package'          => $curr_pkg,
+            'line_count'       => 0,
+            'depends_on'       => [],
+            'parent'           => [],
+            'methods'          => [],
+            'methods_super'    => [],
+            'methods_used'     => {},
+            'constants'        => {},
+            'fields'           => [],
+        };
+    } elsif (!defined $self->{'curr_pkg'}) {
+        # set the default package name
+        my $curr_pkg = $self->_get_default_pkgname();
         $self->{'curr_pkg'} = $curr_pkg;
         $self->{'data'}->{$curr_pkg} = {
             'filename'         => $self->{'filename'},
